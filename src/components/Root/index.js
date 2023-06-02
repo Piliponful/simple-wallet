@@ -1,19 +1,29 @@
-import React from 'react'
-import { Provider } from 'react-redux'
-import projectXUI from 'project-x-ui'
+import React, { useState } from 'react'
+import { getDefaultProvider, Wallet } from 'ethers'
 
-import AuthorizedScreen from './components/AuthorizedScreen'
-import AuthorizationScreen from './components/AuthorizationScreen'
+import { History } from './History'
+import { SendTokens } from './SendTokens'
+import { ERC20List } from './ERC20List'
+import { Balance } from './Balance'
 
-import store from '../../store'
+const provider = getDefaultProvider('sepolia', { alchemy: 'lkffjIS31F1CO6xtEEF7r4URx9cL6696' })
 
-const { shallow: { Body } } = projectXUI
+export const Root = () => {
+  const [wallet, setWallet] = useState('')
+  const [privateKey, setPrivateKey] = useState('')
+  const [erc20Balances, setErc20Balances] = useState([])
 
-export default () => (
-  <Provider store={store}>
-    <Body>
-      <AuthorizationScreen />
-      <AuthorizedScreen />
-    </Body>
-  </Provider>
-)
+  return (
+    <div>
+      <Balance provider={provider} wallet={wallet} />
+      <ERC20List provider={provider} wallet={wallet} setErc20Balances={setErc20Balances} erc20Balances={erc20Balances} />
+      <label>private key</label>
+      <input type='text' onChange={e => setPrivateKey(e.target.value)} />
+      <button onClick={() => setWallet(new Wallet(privateKey, provider))}>load wallet</button>
+      <br />
+      <SendTokens provider={provider} wallet={wallet} erc20Balances={erc20Balances} />
+      <br />
+      <History wallet={wallet} />
+    </div>
+  )
+}
